@@ -116,8 +116,8 @@ class DataInspector:
         self._strategy = strategy
     def set_strategy(self, strategy: DataInspection):
         self._strategy = strategy
-    def excute_strategy(self, df: pd.DataFrame):
-        self._strategy.inspection(df)
+    def excute_strategy(self, df: pd.DataFrame, technique: str):
+        self._strategy.inspection(df, technique)
 
 if __name__ == "__main__":
     pass
