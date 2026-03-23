@@ -4,119 +4,152 @@ import pandas as pd
 
 #Abstract Base class for Data Inspection
 #---------------------------------------
-#This class is design to use inheritance in Data Inspection Strategy to Find multiple reports
+#This class is designed to use inheritance in Data Inspection Strategy to find multiple reports
 class DataInspection(ABC):
     @abstractmethod
     def inspection(self, df: pd.DataFrame, technique: str):
-        """
-        "This Method is a common method in all Techniques to Analyze the Data"
-        Parameters:
-        df pd.DataFrame: This the Data take from the csv file
-        technique: This is the technique provide which type of analyization you want to performe
+        """Abstract method for data inspection techniques.
 
-        Returns:
-        It returns the Panda Data Frame after processing
+        This method provides a common interface for various data analysis techniques.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The DataFrame to analyze, typically loaded from a CSV file.
+        technique : str
+            The specific analysis technique to apply.
+
+        Returns
+        -------
+        None
+            This method performs analysis and prints results; it does not return a value.
         """
         pass
 
 #Concrete Class for Numerical Analysis 
 #-------------------------------------
-#This class provide all the Numerical Analysis function inside a Data set
+#This class provides all the Numerical Analysis functions inside a dataset
 class NumericalAnalysis(DataInspection):
     def inspection(self, df: pd.DataFrame, technique: str):
+        """Perform numerical analysis on the DataFrame.
+
+        This method analyzes the DataFrame using various numerical inspection techniques.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The pandas DataFrame to perform the action on.
+        technique : str
+            The analysis technique to apply. Supported values: 'info', 'dtypes', 'missing_values', 'duplicates'.
+            If empty or None, defaults to 'info'.
         """
-        "This Method Analyze the data through it numercal values"
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError("Input must be a pandas DataFrame")
 
-        Parameters:
-        df pd.DataFrame: This is a Panda Data Frame to do the Action.
-        technique: This will take severl values(ex.)
-        """
-        #Checking for Data Frames
-        if not isinstance(df):
-            print("Data Type is not provided")
+        technique = technique or "info"
 
-        #Checking for Techniques Provided or not
-        if not technique:
-            try:
-                print("---Printing info of file---")
-                print(df.info())
-            except Exception as e:
-                print(f"Counterd this error{e}")
-
-        #Print the Info of the DataSet
         if technique == "info":
             try:
                 print("---Printing info of file---")
                 print(df.info())
             except Exception as e:
-                print(f"Counterd this error{e}")
-        #Print the Data types
+                print(f"Encountered this error: {e}")
         elif technique == "dtypes":
             try:
                 print("\n---Printing Data Types---")
-                print(df.dtypes())
+                print(df.dtypes)
             except Exception as e:
-                print(f"Counterd this error{e}")
-        #Print the missing Values
+                print(f"Encountered this error: {e}")
         elif technique == "missing_values":
             try:
                 print("\n---Printing Missing Values---")
                 print(df.isnull().sum())
             except Exception as e:
-                print(f"Counterd this error{e}")
-        #Print the duplicate Values
+                print(f"Encountered this error: {e}")
         elif technique == "duplicates":
             try:
-                print("\n---Printing Duplicate Values")
+                print("\n---Printing Duplicate Values---")
                 print(df.duplicated().sum())
             except Exception as e:
-                print(f"Counterd this error{e}")
+                print(f"Encountered this error: {e}")
+        else:
+            print(f"Unknown technique: {technique}. Supported: 'info', 'dtypes', 'missing_values', 'duplicates'")
 
-#Concrete class for statstical Analysis
+#Concrete class for statistical Analysis
 #--------------------------------------
-#This class provide all the statistical level Analysis.
+#This class provides all the statistical level analysis.
 class StatisticalAnalysis(DataInspection):
     def inspection(self, df: pd.DataFrame, technique: str):
-        """
-        "This Method Analyze the data through it numercal values"
+        """Perform statistical analysis on the DataFrame.
 
-        Parameters:
-        df pd.DataFrame: This is a Panda Data Frame to do the Action.
-        technique: This will take severl values(ex.)
-        """
-        #Checking for Data Frames
-        if not isinstance(df):
-            print("Data Type is not provided")
+        This method analyzes the DataFrame using statistical summary techniques.
 
-        #Checking for Techniques Provided or not
-        if not technique:
-            try:
-                print("---Printing info of file---")
-                print(df.describe())
-            except Exception as e:
-                print(f"Counterd this error{e}")
-        if technique == "Numerical":
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The pandas DataFrame to perform the action on.
+        technique : str
+            The analysis technique to apply. Supported values: 'numerical', 'categorical'.
+            If empty or None, defaults to 'numerical'.
+        """
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError("Input must be a pandas DataFrame")
+
+        technique = technique or "numerical"
+
+        if technique == "numerical":
             try:
                 print("---Printing Numerical Analysis---")
                 print(df.describe())
             except Exception as e:
-                print(f"Error Occured while Numerical Analysis: {e}.")
+                print(f"Error occurred while performing numerical analysis: {e}.")
         elif technique == "categorical":
             try:
                 print("---Printing Categorical Analysis---")
                 print(df.describe(include=['O']))
             except Exception as e:
-                print(f"Error Occured while Numerical Analysis: {e}.")
+                print(f"Error occurred while performing categorical analysis: {e}.")
+        else:
+            print(f"Unknown technique: {technique}. Supported: 'numerical', 'categorical'")
 
 #Context Class for Data Inspector.
 #---------------------------------
-#This class Will generate the Analysis Data.
+#This class will generate the analysis data.
 class DataInspector:
+    """Context class for executing data inspection strategies.
+
+    This class uses the Strategy pattern to allow dynamic selection of inspection techniques.
+    """
     def __init__(self, strategy: DataInspection):
+        """Initialize the DataInspector with a specific inspection strategy.
+
+        Parameters
+        ----------
+        strategy : DataInspection
+            The inspection strategy to use (e.g., NumericalAnalysis or StatisticalAnalysis).
+        """
         self._strategy = strategy
+
     def set_strategy(self, strategy: DataInspection):
+        """Set a new inspection strategy.
+
+        Parameters
+        ----------
+        strategy : DataInspection
+            The new inspection strategy to use.
+        """
         self._strategy = strategy
-    def excute_strategy(self, df: pd.DataFrame, technique: str):
+
+    def execute_strategy(self, df: pd.DataFrame, technique: str):
+        """Execute the current inspection strategy on the DataFrame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The DataFrame to analyze.
+        technique : str
+            The specific technique to apply, as defined by the strategy.
+        """
         self._strategy.inspection(df, technique)
 
 if __name__ == "__main__":
